@@ -1,8 +1,49 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
-export async function generateCVContent(cvData: any, apiKey: string) {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+interface CVData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  education: string;
+  experienceLevel: string;
+  experienceField?: string;
+  jobDescription: string;
+}
+
+interface GeneratedCV {
+  format: 'indonesia' | 'international';
+  summary: string;
+  experience: Array<{
+    title: string;
+    company: string;
+    location: string;
+    period: string;
+    achievements: string[];
+  }>;
+  skills: Array<{
+    category: string;
+    skills: string[];
+  }>;
+  keywords: string[];
+  matchedSkills: string[];
+  missingSkills: string[];
+  atsScore: number;
+  warnings?: Array<{
+    type: string;
+    message: string;
+    recommendations?: string[];
+  }>;
+}
+
+export async function generateCVContent(
+  cvData: CVData, 
+  apiKey: string
+): Promise<GeneratedCV> {
+  const groq = new Groq({ 
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true 
+  });
 
   const prompt = `
 You are an expert CV/resume writer and ATS optimization specialist. Generate a complete, ATS-friendly CV based on the following information:
@@ -57,9 +98,9 @@ ${cvData.jobDescription}
    - Suggest courses, certifications, or preparation needed
 
 **OUTPUT FORMAT (JSON):**
-\`\`\`json
+Return ONLY valid JSON in this exact format, no markdown formatting:
 {
-  "format": "indonesia" | "international",
+  "format": "indonesia",
   "summary": "2-3 sentences professional summary highly tailored to job desc",
   "experience": [
     {
@@ -100,15 +141,29 @@ ${cvData.jobDescription}
     }
   ]
 }
-\`\`\`
 
-Generate the complete CV now. Be specific, realistic, and ATS-optimized. Return ONLY valid JSON, no markdown formatting.
+Generate the complete CV now. Be specific, realistic, and ATS-optimized.
 `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert CV writer. Always respond with valid JSON only, no markdown formatting."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.7,
+      max_tokens: 4000,
+      response_format: { type: "json_object" }
+    });
+
+    const text = completion.choices[0]?.message?.content || '';
     
     // Clean up markdown if present
     let jsonText = text.trim();
@@ -119,10 +174,10 @@ Generate the complete CV now. Be specific, realistic, and ATS-optimized. Return 
       jsonText = jsonText.replace(/```\n?/g, '');
     }
     
-    const generatedData = JSON.parse(jsonText);
+    const generatedData = JSON.parse(jsonText) as GeneratedCV;
     return generatedData;
-  } catch (error: any) {
-    console.error('Gemini API Error:', error);
-    throw new Error(`Failed to generate CV: ${error.message}`);
+  } catch (error) {
+    console.error('Groq API Error:', error);
+    throw new Error(`Failed to generate CV: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

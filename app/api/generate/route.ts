@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCVContent } from '@/lib/gemini';
 
+interface RequestBody {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  education: string;
+  experienceLevel: string;
+  experienceField?: string;
+  jobDescription: string;
+  apiKey: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json() as RequestBody;
     
     // Validate required fields
     if (!body.apiKey) {
@@ -28,10 +40,10 @@ export async function POST(request: NextRequest) {
       data: generatedCV
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate CV' },
+      { error: error instanceof Error ? error.message : 'Failed to generate CV' },
       { status: 500 }
     );
   }

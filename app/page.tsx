@@ -2,13 +2,57 @@
 
 import { useState } from 'react';
 
+// Define types
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  education: string;
+  experienceLevel: string;
+  experienceField: string;
+  jobDescription: string;
+  apiKey: string;
+}
+
+interface Warning {
+  type: string;
+  message: string;
+  recommendations?: string[];
+}
+
+interface Experience {
+  title: string;
+  company: string;
+  location: string;
+  period: string;
+  achievements: string[];
+}
+
+interface SkillCategory {
+  category: string;
+  skills: string[];
+}
+
+interface GeneratedCV {
+  format: 'indonesia' | 'international';
+  summary: string;
+  experience: Experience[];
+  skills: SkillCategory[];
+  keywords: string[];
+  matchedSkills: string[];
+  missingSkills: string[];
+  atsScore: number;
+  warnings?: Warning[];
+}
+
 export default function Home() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedCV, setGeneratedCV] = useState<any>(null);
+  const [generatedCV, setGeneratedCV] = useState<GeneratedCV | null>(null);
   const [error, setError] = useState('');
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     phone: '',
@@ -20,7 +64,7 @@ export default function Home() {
     apiKey: '',
   });
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -66,9 +110,9 @@ export default function Home() {
       }
 
       setGeneratedCV(data.data);
-      setStep(5); // Move to results page
-    } catch (err: any) {
-      setError(err.message);
+      setStep(5);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -301,8 +345,8 @@ export default function Home() {
                         <strong>Get your free API key:</strong>
                       </p>
                       <ol className="text-sm text-blue-700 mt-1 ml-4 list-decimal">
-                        <li>Visit <a href="https://ai.google.dev" target="_blank" className="underline">ai.google.dev</a></li>
-                        <li>Click "Get API Key"</li>
+                        <li>Visit <a href="https://ai.google.dev" target="_blank" rel="noopener noreferrer" className="underline">ai.google.dev</a></li>
+                        <li>Click &quot;Get API Key&quot;</li>
                         <li>Free tier: 1,500 requests/day</li>
                       </ol>
                     </div>
@@ -375,14 +419,14 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-yellow-800 mb-3">
                   ⚠️ Important Notes
                 </h3>
-                {generatedCV.warnings.map((warning: any, idx: number) => (
+                {generatedCV.warnings.map((warning, idx) => (
                   <div key={idx} className="mb-4">
                     <p className="text-yellow-800 font-medium">{warning.message}</p>
                     {warning.recommendations && warning.recommendations.length > 0 && (
                       <div className="mt-2">
                         <p className="text-sm text-yellow-700 font-medium">Recommendations:</p>
                         <ul className="text-sm text-yellow-700 ml-4 list-disc">
-                          {warning.recommendations.map((rec: string, i: number) => (
+                          {warning.recommendations.map((rec, i) => (
                             <li key={i}>{rec}</li>
                           ))}
                         </ul>
@@ -445,7 +489,7 @@ export default function Home() {
                   <h2 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-300 pb-2">
                     WORK EXPERIENCE
                   </h2>
-                  {generatedCV.experience.map((exp: any, idx: number) => (
+                  {generatedCV.experience.map((exp, idx) => (
                     <div key={idx} className="mb-6">
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -455,7 +499,7 @@ export default function Home() {
                         <p className="text-gray-600 text-sm">{exp.period}</p>
                       </div>
                       <ul className="list-disc ml-5 space-y-1">
-                        {exp.achievements.map((achievement: string, i: number) => (
+                        {exp.achievements.map((achievement, i) => (
                           <li key={i} className="text-gray-700">{achievement}</li>
                         ))}
                       </ul>
@@ -478,7 +522,7 @@ export default function Home() {
                   <h2 className="text-xl font-bold text-gray-900 mb-3 border-b border-gray-300 pb-2">
                     SKILLS
                   </h2>
-                  {generatedCV.skills.map((skillCat: any, idx: number) => (
+                  {generatedCV.skills.map((skillCat, idx) => (
                     <div key={idx} className="mb-3">
                       <p className="font-semibold text-gray-900">{skillCat.category}:</p>
                       <p className="text-gray-700">{skillCat.skills.join(', ')}</p>
