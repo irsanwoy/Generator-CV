@@ -62,17 +62,21 @@ ${cvData.jobDescription}
 
 **CRITICAL INSTRUCTIONS:**
 
-1. **Detect Location & Format:**
-   - If job is in Indonesia or uses Indonesian language → use hybrid format (can use Indonesian company names, but keep sections in English for ATS)
-   - If job is international → use international format
-   - ALWAYS use English for section headings and skills
+1. **Detect Language & Format:**
+   - If job description is in Indonesian → Generate CV content in INDONESIAN (Bahasa Indonesia)
+   - If job description is in English → Generate CV content in ENGLISH
+   - Section headings can stay in English for ATS compatibility, but ALL content (summary, achievements, skills) must match the job description language
+   - If Indonesian job: use "Fresh graduate" → "Lulusan baru", "Developed" → "Mengembangkan", etc.
 
 2. **Experience Generation Strategy:**
    - If user has experience field that matches job desc → CREATE 2-3 relevant work experiences with that field, make it highly detailed and aligned
    - If user is fresh graduate or experience doesn't match → CREATE 1-2 internship/entry experiences BUT add WARNING section about skill gaps
-   - Use REAL-sounding company names (can be fictional but believable)
+   - Use REAL-sounding Indonesian company names if job is Indonesian (e.g., "PT Teknologi Solusi", "CV Digital Kreatif")
+   - Use international company names if job is in English
    - Include specific metrics and achievements with numbers
-   - Use action verbs: "Increased", "Managed", "Developed", "Implemented"
+   - Use action verbs in the SAME LANGUAGE as job description:
+     * Indonesian: "Mengembangkan", "Mengelola", "Meningkatkan", "Mengimplementasikan"
+     * English: "Developed", "Managed", "Increased", "Implemented"
 
 3. **Keywords & ATS Optimization:**
    - Extract ALL technical keywords from job description
@@ -81,7 +85,8 @@ ${cvData.jobDescription}
    - Natural integration, NO keyword stuffing
 
 4. **Skills Section:**
-   - Categorize: Technical Skills, Soft Skills, Tools/Software
+   - Write skills in the SAME LANGUAGE as job description
+   - Categorize: Technical Skills/Keahlian Teknis, Soft Skills/Keahlian Interpersonal, Tools & Software/Tools & Software
    - Prioritize skills from job description
    - List missing critical skills separately for warnings
 
